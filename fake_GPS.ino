@@ -5,13 +5,13 @@ extern "C"
 
 #include <ESP8266WiFi.h>          // https://github.com/esp8266/Arduino
 #include <WiFiUdp.h>
-#include <time.h>
+#include <time.h>		// standard c library
 
 //needed for library
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager
-#include "WTAClient.h"			  // https://github.com/arduino-libraries/NTPClient
+#include "WTAClient.h"	
 
 WTAClient wtaClient;
 WiFiManager wifiManager;
@@ -32,7 +32,7 @@ void setup()
 	//here  "NixieAP"
 	//and goes into a blocking loop awaiting configuration
 
-	if (!wifiManager.autoConnect("NixieAP"))
+	if (!wifiManager.autoConnect("FakeGPS-AP"))
 	{
 		Serial.println("failed to connect and hit timeout");
 		delay(3000);
