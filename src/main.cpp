@@ -117,9 +117,10 @@ void setup() {
   //if you get here you have connected to the WiFi
   Serial.println("FakeGPS: connected...yeey :)");
 
-  Serial1.begin(GPSBAUD); //Tx only GPIO2 (D4)
   setSyncInterval(GPSPERIOD);
   setSyncProvider(getWtaTime);
+
+  Serial1.begin(GPSBAUD); //Tx only GPIO2 (D4); LED will turn off as it uses the same pin on WEMOS D1 Mini.
 } // setup
 
 
@@ -160,12 +161,12 @@ void loop() {
     }
 
     //update clock and flash LED
-    digitalWrite(LED_BUILTIN, LOW); //LED on
+    //digitalWrite(LED_BUILTIN, LOW); //LED on; Doesnt work as Serial1 uses the same pin on WEMOS D1 Mini
     updateClock();  
-    digitalWrite(LED_BUILTIN, HIGH); //LED off
+    //digitalWrite(LED_BUILTIN, HIGH); //LED off; Doesnt work as Serial1 uses the same pin on WEMOS D1 Mini
 
   } else {  //time not set
-    digitalWrite(LED_BUILTIN, LOW); //LED on; doesnt seem to work, weird
+    //digitalWrite(LED_BUILTIN, LOW); //LED on; Doesnt work as Serial1 uses the same pin on WEMOS D1 Mini
 
     if (prevTimeStatus == timeSet) {
       //decrease Sync interval to get the time set faster
