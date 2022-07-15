@@ -4,12 +4,13 @@
 //Inspred by: xSnowHeadx March 2022 https://github.com/xSnowHeadx/FakeGPS
 
 #include <Arduino.h>
+//== Wifi Manager ==
 #include <WiFiManager.h>  // https://github.com/esp8266/Arduino
 #define WMAPNAME "FakeGPS-AP" //Wifi Manager AP name
 #define WMTIMEOUT 180 //Wifi manager time out in seconds
 
-#include <ArduinoJson.h>  //https://github.com/bblanchon/ArduinoJson
-#include <TimeLib.h>      //https://github.com/PaulStoffregen/Time
+#include <ArduinoJson.h>  // https://github.com/bblanchon/ArduinoJson
+#include <TimeLib.h>      // https://github.com/PaulStoffregen/Time
 
 #define WTAServerName  "http://worldtimeapi.org/api/"
 char timezone[] = "ip"; // PREFERENCE: TimeZone. Go to http://worldtimeapi.org/api/timezone to find your timezone string or chose "ip" to use IP-localisation for timezone detection
@@ -23,37 +24,38 @@ char timezone[] = "ip"; // PREFERENCE: TimeZone. Go to http://worldtimeapi.org/a
 #define DRD_ADDRESS 0 // RTC Memory Address for the DoubleResetDetector to use
 DoubleResetDetector drd(DRD_TIMEOUT, DRD_ADDRESS);
 
-WiFiClient wifiClient;
 #include <ESP8266HTTPClient.h>
+WiFiClient wifiClient;
 HTTPClient http;
 
+//Get the time from World Time API
 time_t getWtaTime() {
-	Serial.println("FakeGPS: Getting WTA Time");
+  Serial.println("FakeGPS: Getting WTA Time");
 
-	char url[64] = WTAServerName;
-	strcat(url, timezone);
+  char url[64] = WTAServerName;
+  strcat(url, timezone);
 
-	if (!http.begin(wifiClient, url)) {
+  if (!http.begin(wifiClient, url)) {
     Serial.println("FakeGPS: http begin failed");
     http.end();
     return 0;
   }
   int httpCode = http.GET();
-	if (httpCode != HTTP_CODE_OK) {
+  if (httpCode != HTTP_CODE_OK) {
     Serial.print("FakeGPS: http GET failed. Code: ");
     Serial.println(httpCode);
     http.end();
     return 0;
   }
   String payload = http.getString();
-	http.end();
+  http.end();
   if(!payload.length())  {
     Serial.println("FakeGPS: payload length failed");
     return 0;
   }
 
   const size_t capacity = JSON_OBJECT_SIZE(15) + 400;
-	DynamicJsonDocument jsonDocument(capacity);
+  DynamicJsonDocument jsonDocument(capacity);
   if (deserializeJson(jsonDocument, payload.c_str()))  {
     Serial.println("FakeGPS: deserializeJson failed");
     return 0;
@@ -75,7 +77,7 @@ time_t getWtaTime() {
   //      const char* client_ip = jsonDocument["client_ip"]; // "23.235.227.109"
   //      const char* abbreviation = jsonDocument["abbreviation"]; // "EDT"
 
-	return (unixtime + raw_offset + dst_offset);
+  return (unixtime + raw_offset + dst_offset);
 
 } // getWtaTime
 
@@ -98,7 +100,7 @@ void setup() {
 
   if (drd.detectDoubleReset()) {
     Serial.println("FakeGPS: Double Reset Detected; Starting Wifi Config Portal");
-     wmres = wm.startConfigPortal(WMAPNAME);
+    wmres = wm.startConfigPortal(WMAPNAME);
   } else {
     Serial.println("FakeGPS: Single Reset Detected; Auto connect");
     wmres = wm.autoConnect(WMAPNAME);
@@ -124,6 +126,7 @@ void setup() {
 } // setup
 
 
+//send the current time to the clock
 void updateClock() {
     char tstr[128];
     sprintf(tstr, "$GPRMC,%02d%02d%02d,A,0000.0000,N,00000.0000,E,0.0,0.0,%02d%02d%02d,0.0,E,S",
